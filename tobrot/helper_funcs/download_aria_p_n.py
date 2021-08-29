@@ -155,10 +155,7 @@ def add_url(aria_instance, text_url, c_file_name, event):
             except DirectDownloadLinkException as e:
                 LOGGER.info(f'{text_url}: {e}')
                 if "💬" in str(e):
-                   return (False, "ERROR: {e}")
-                   event.reply(
-                         f"ERROR:\n<code>{e}", quote=True
-                   )
+                   return (False, f"ERROR: {e}")
     else:
         uris = [text_url]
     # Add URL Into Queue
