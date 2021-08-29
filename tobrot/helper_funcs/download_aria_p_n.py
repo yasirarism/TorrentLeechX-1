@@ -126,7 +126,7 @@ def add_torrent(aria_instance, torrent_file_path):
         return False, "**FAILED** \nPlease try other sources to get workable link"
 
 
-def add_url(aria_instance, text_url, c_file_name):
+def add_url(aria_instance, text_url, c_file_name, event):
     options = None
     # if c_file_name is not None:
     #     options = {
@@ -156,6 +156,9 @@ def add_url(aria_instance, text_url, c_file_name):
                 LOGGER.info(f'{text_url}: {e}')
                 if "💬" in str(e):
                    return (False, "ERROR: {e}")
+                   await event.reply(
+                         f"ERROR:\n<code>{e}", quote=True
+                   )
     else:
         uris = [text_url]
     # Add URL Into Queue
