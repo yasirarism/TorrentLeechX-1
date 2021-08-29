@@ -369,7 +369,7 @@ async def upload_single_file(
     else:
         try:
             message_for_progress_display = message
-            if local_file_name.upper().endswith("HTML") or local_file_name.upper().startswith("view"):
+            if local_file_name.upper().endswith("HTML") or local_file_name.find(".") == -1:
                 await message.reply_text("<a href='tg://user?id={from_user}'>⚠️</a> Not supported link, jangan ngeyel !!!", quote=True)
                 os.remove(local_file_name)
                 return
