@@ -41,14 +41,14 @@ def direct_link_generator(text_url: str):
         return fichier(text_url)
     elif 'racaty.net' in text_url:
         return racaty(text_url)
-    elif 'layarkacaxxi.icu' in link:
-        return fembed720(link)
-    elif 'femax20.com' in link:
-        return fembed480(link)
-    elif 'fembed.com' in link:
-        return fembed360(link)
-    elif 'fembed.net' in link:
-        return fembed(link)
+    elif 'layarkacaxxi.icu' in text_url:
+        return fembed720(text_url)
+    elif 'femax20.com' in text_url:
+        return fembed480(text_url)
+    elif 'fembed.com' in text_url:
+        return fembed360(text_url)
+    elif 'fembed.net' in text_url:
+        return fembed(text_url)
     else:
         raise DirectDownloadLinkException(f'No Direct link function found for {text_url}')
 
