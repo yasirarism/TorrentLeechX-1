@@ -156,7 +156,7 @@ def add_url(aria_instance, text_url, c_file_name, event):
                 LOGGER.info(f'{text_url}: {e}')
                 if "💬" in str(e):
                    return (False, "ERROR: {e}")
-                   await event.reply(
+                   event.reply(
                          f"ERROR:\n<code>{e}", quote=True
                    )
     else:
