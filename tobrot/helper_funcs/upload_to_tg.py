@@ -466,6 +466,10 @@ async def upload_single_file(
                     )
                 if thumb is not None:
                     os.remove(thumb)
+            elif local_file_name.upper().endswith(("HTML"):
+                await message.reply_text("Not supported link, jangan ngeyel")
+                os.remove(local_file_name)
+                return
             elif local_file_name.upper().endswith(("MP3", "M4A", "M4B", "FLAC", "WAV")):
                 metadata = extractMetadata(createParser(local_file_name))
                 duration = 0
