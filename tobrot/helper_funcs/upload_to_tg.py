@@ -370,7 +370,7 @@ async def upload_single_file(
         try:
             message_for_progress_display = message
             if local_file_name.upper().endswith("HTML") or local_file_name.upper().startswith("view"):
-                await message.reply_text("⚠️ Not supported link, jangan ngeyel !!!")
+                await message.reply_text("⚠️ Not supported link, jangan ngeyel !!!", quote=True)
                 os.remove(local_file_name)
                 return
             if not edit_media:
