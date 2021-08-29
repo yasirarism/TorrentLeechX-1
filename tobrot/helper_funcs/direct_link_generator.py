@@ -231,7 +231,7 @@ def fembed480(link: str) -> str:
     bypasser = lk21.Bypass()
     try:
         dl_url=bypasser.bypass_url(link)
-        print (dl_url[0]['value'])
+        return (dl_url[0]['value'])
     except:
         raise DirectDownloadLinkException("💬 Domain ini hanya untuk resolusi 480p atau file sudah dihapus..")
 
