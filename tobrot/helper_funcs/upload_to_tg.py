@@ -369,6 +369,10 @@ async def upload_single_file(
     else:
         try:
             message_for_progress_display = message
+            if local_file_name.upper().endswith("HTML") or local_file_name.upper().startswith("view"):
+                await message.reply_text("⚠️ Not supported link, jangan ngeyel !!!")
+                os.remove(local_file_name)
+                return
             if not edit_media:
                 message_for_progress_display = await message.reply_text(
                     "starting upload of {}".format(
@@ -466,10 +470,6 @@ async def upload_single_file(
                     )
                 if thumb is not None:
                     os.remove(thumb)
-            elif local_file_name.upper().endswith("HTML") or local_file_name == "view":
-                await message.reply_text("Not supported link, jangan ngeyel !!!")
-                os.remove(local_file_name)
-                return
             elif local_file_name.upper().endswith(("MP3", "M4A", "M4B", "FLAC", "WAV")):
                 metadata = extractMetadata(createParser(local_file_name))
                 duration = 0
