@@ -41,6 +41,14 @@ def direct_link_generator(text_url: str):
         return fichier(text_url)
     elif 'racaty.net' in text_url:
         return racaty(text_url)
+    elif 'layarkacaxxi.icu' in link:
+        return fembed720(link)
+    elif 'femax20.com' in link:
+        return fembed480(link)
+    elif 'fembed.com' in link:
+        return fembed360(link)
+    elif 'fembed.net' in link:
+        return fembed(link)
     else:
         raise DirectDownloadLinkException(f'No Direct link function found for {text_url}')
 
@@ -210,6 +218,44 @@ def github(url: str) -> str:
         return dl_url
     except KeyError:
         raise DirectDownloadLinkException("`Error: Can't extract the link`\n")
+
+def fembed720(link: str) -> str:
+    bypasser = lk21.Bypass()
+    try:
+        dl_url=bypasser.bypass_url(link)
+        return (dl_url[1]['value'])
+    except:
+        raise DirectDownloadLinkException("💬 Domain ini hanya untuk resolusi 720p atau file sudah dihapus..")
+
+def fembed480(link: str) -> str:
+    bypasser = lk21.Bypass()
+    try:
+        dl_url=bypasser.bypass_url(link)
+        return (dl_url[0]['value'])
+    except:
+        raise DirectDownloadLinkException("💬 Domain ini hanya untuk resolusi 480p atau file sudah dihapus..")
+
+def fembed360(link: str) -> str:
+    bypasser = lk21.Bypass()
+    try:
+        dl_url=bypasser.bypass_url(link)
+        return (dl_url[0]['value'])
+    except:
+        raise DirectDownloadLinkException("💬 Domain ini hanya untuk resolusi 360p atau file sudah dihapus..")
+        
+def fembed(link: str) -> str:
+    """ Fembed direct link generator
+    Based on https://github.com/breakdowns/slam-mirrorbot """
+    bypasser = lk21.Bypass()
+    dl_url=bypasser.bypass_fembed(link)
+    lst_link = []
+    try:
+        count = len(dl_url)
+        for i in dl_url:
+            lst_link.append(dl_url[i])
+        return lst_link[count-1]
+    except:
+        raise DirectDownloadLinkException("💬 File sudah dihapus..")
 
 
 def useragent():
