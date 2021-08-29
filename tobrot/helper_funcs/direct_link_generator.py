@@ -14,7 +14,7 @@ import urllib.parse
 from os import popen
 from random import choice
 from js2py import EvalJs
-import requests
+import requests, cfscrape
 from bs4 import BeautifulSoup
 
 from tobrot.helper_funcs.exceptions import DirectDownloadLinkException
@@ -36,35 +36,99 @@ def direct_link_generator(text_url: str):
         return osdn(text_url)
     elif 'github.com' in text_url:
         return github(text_url)
+    elif '1fichier.com' in text_url:
+        return fichier(text_url)
     elif 'racaty.net' in text_url:
         return racaty(text_url)
     else:
         raise DirectDownloadLinkException(f'No Direct link function found for {text_url}')
 
+def fichier(link: str) -> str:
+    """ 1Fichier direct links generator
+    Based on https://github.com/Maujar/updateref-16-7-21
+             https://github.com/breakdowns/slam-mirrorbot """
+    regex = r"^([http:\/\/|https:\/\/]+)?.*1fichier\.com\/\?.+"
+    gan = re.match(regex, link)
+    if not gan:
+      raise DirectDownloadLinkException("💬 Link yang kamu kirim salah!")
+    if "::" in link:
+      pswd = link.split("::")[-1]
+      url = link.split("::")[-2]
+    else:
+      pswd = None
+      url = link
+    try:
+      if pswd is None:
+        req = requests.post(url)
+      else:
+        pw = {"pass": pswd}
+        req = requests.post(url, data=pw)
+    except:
+      raise DirectDownloadLinkException("💬 Gagal terhubung ke 1fichier server!")
+    if req.status_code == 404:
+      raise DirectDownloadLinkException("💬 File tidak ditemukan / atau link nya salah!")
+    soup = BeautifulSoup(req.content, 'lxml')
+    if soup.find("a", {"class": "ok btn-general btn-orange"}) is not None:
+      dl_url = soup.find("a", {"class": "ok btn-general btn-orange"})["href"]
+      if dl_url is None:
+        raise DirectDownloadLinkException("💬 Gagal generate Direct Link 1fichier!")
+      else:
+        return dl_url
+    else:
+      if len(soup.find_all("div", {"class": "ct_warn"})) == 2:
+        str_2 = soup.find_all("div", {"class": "ct_warn"})[-1]
+        if "you must wait" in str(str_2).lower():
+          numbers = [int(word) for word in str(str_2).split() if word.isdigit()]
+          if len(numbers) == 0:
+            raise DirectDownloadLinkException("💬 1fichier sedang limit. Mohon tunggu beberapa menit/jam.")
+          else:
+            raise DirectDownloadLinkException(f"💬 1fichier sedang limit. Mohon tunggu {numbers[0]} menit.")
+        elif "protect access" in str(str_2).lower():
+          raise DirectDownloadLinkException("💬 Link ini membutuhkan password!\n\n<b>This link requires a password!</b>\n- Insert sign <b>::</b> after the link and write the password after the sign.\n\n<b>Example:</b>\n<code>/mirror https://1fichier.com/?smmtd8twfpm66awbqz04::love you</code>\n\n* No spaces between the signs <b>::</b>\n* For the password, you can use a space!")
+        else:
+          raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
+      elif len(soup.find_all("div", {"class": "ct_warn"})) == 3:
+        str_1 = soup.find_all("div", {"class": "ct_warn"})[-2]
+        str_3 = soup.find_all("div", {"class": "ct_warn"})[-1]
+        if "you must wait" in str(str_1).lower():
+          numbers = [int(word) for word in str(str_1).split() if word.isdigit()]
+          if len(numbers) == 0:
+            raise DirectDownloadLinkException("💬 1fichier sedang limit. Mohon tunggu beberapa menit/jam.")
+          else:
+            raise DirectDownloadLinkException(f"💬 1fichier sedang limit. Mohon tunggu {numbers[0]} menit.")
+        elif "bad password" in str(str_3).lower():
+          raise DirectDownloadLinkException("💬 Password yang kamu masukkan salah!")
+        else:
+          raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
+      else:
+        raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
+
 
 def zippy_share(url: str) -> str:
-    link = re.findall("https:/.(.*?).zippyshare", url)[0]
-    response_content = (requests.get(url)).content
-    bs_obj = BeautifulSoup(response_content, "lxml")
-
+    """ ZippyShare direct links generator
+    Based on https://github.com/KenHV/Mirror-Bot
+             https://github.com/jovanzers/WinTenCermin """
     try:
-        js_script = bs_obj.find("div", {"class": "center",}).find_all(
-            "script"
-        )[1]
-    except:
-        js_script = bs_obj.find("div", {"class": "right",}).find_all(
-            "script"
-        )[0]
-
-    js_content = re.findall(r'\.href.=."/(.*?)";', str(js_script))
-    js_content = 'var x = "/' + js_content[0] + '"'
-
-    evaljs = EvalJs()
-    setattr(evaljs, "x", None)
-    evaljs.execute(js_content)
-    js_content = getattr(evaljs, "x")
-
-    return f"https://{link}.zippyshare.com{js_content}"
+        link = re.findall(r'\bhttps?://.*zippyshare\.com\S+', url)[0]
+    except IndexError:
+        raise DirectDownloadLinkException("💬 Format Zippyshare links salah")
+    try:
+        base_url = re.search('http.+.zippyshare.com', link).group()
+        response = requests.get(link).content
+        pages = BeautifulSoup(response, "lxml")
+        try:
+            js_script = pages.find("div", {"class": "center"}).find_all("script")[1]
+        except IndexError:
+            js_script = pages.find("div", {"class": "right"}).find_all("script")[0]
+        js_content = re.findall(r'\.href.=."/(.*?)";', str(js_script))
+        js_content = 'var x = "/' + js_content[0] + '"'
+        evaljs = EvalJs()
+        setattr(evaljs, "x", None)
+        evaljs.execute(js_content)
+        js_content = getattr(evaljs, "x")
+        return base_url + js_content
+    except IndexError:
+        raise DirectDownloadLinkException("💬 Tidak bisa menemukan tombol download, mungkin file sudah dihapus.")
 
 
 def yandex_disk(url: str) -> str:
@@ -160,16 +224,19 @@ def useragent():
     return user_agent.text
 
 def racaty(url: str) -> str:
+    """ Racaty direct links generator
+    based on https://github.com/breakdowns/slam-mirrorbot """
     dl_url = ''
     try:
-        text_url = re.findall(r'\bhttps?://.*racaty\.net\S+', url)[0]
+        link = re.findall(r'\bhttps?://.*racaty\.net\S+', url)[0]
     except IndexError:
         raise DirectDownloadLinkException("`No Racaty links found`\n")
-    reqs=requests.get(text_url)
-    bss=BeautifulSoup(reqs.text,'html.parser')
-    op=bss.find('input',{'name':'op'})['value']
-    id=bss.find('input',{'name':'id'})['value']
-    rep=requests.post(text_url,data={'op':op,'id':id})
-    bss2=BeautifulSoup(rep.text,'html.parser')
-    dl_url=bss2.find('a',{'id':'uniqueExpirylink'})['href']
+    scraper = cfscrape.create_scraper()
+    r = scraper.get(url)
+    soup = BeautifulSoup(r.text, "lxml")
+    op = soup.find("input", {"name": "op"})["value"]
+    ids = soup.find("input", {"name": "id"})["value"]
+    rpost = scraper.post(url, data = {"op": op, "id": ids})
+    rsoup = BeautifulSoup(rpost.text, "lxml")
+    dl_url = rsoup.find("a", {"id": "uniqueExpirylink"})["href"].replace(" ", "%20")
     return dl_url
