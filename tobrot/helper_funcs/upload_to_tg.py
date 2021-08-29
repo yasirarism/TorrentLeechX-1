@@ -74,7 +74,7 @@ async def upload_to_tg(
         new_m_esg = message
         if not message.photo:
             new_m_esg = await message.reply_text(
-                f"Found {len(directory_contents)} files <a href='tg://user?id={from_user}'>🤒</a>",
+                f"Found {len(directory_contents)} files",
                 quote=True
                 # reply_to_message_id=message.message_id
             )
@@ -370,7 +370,7 @@ async def upload_single_file(
         try:
             message_for_progress_display = message
             if local_file_name.upper().endswith("HTML") or local_file_name.upper().startswith("view"):
-                await message.reply_text("⚠️ Not supported link, jangan ngeyel !!!", quote=True)
+                await message.reply_text("<a href='tg://user?id={from_user}'>⚠️</a> Not supported link, jangan ngeyel !!!", quote=True)
                 os.remove(local_file_name)
                 return
             if not edit_media:
