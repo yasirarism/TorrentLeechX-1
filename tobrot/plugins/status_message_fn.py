@@ -43,7 +43,7 @@ async def status_message_f(
 ):  # weird code but 'This is the way' @gautamajay52
     aria_i_p = await aria_start()
     # Show All Downloads
-    to_edit = await message.reply(".......")
+    to_edit = await message.reply("Enteni sek yaaa..")
     chat_id = int(message.chat.id)
     mess_id = int(to_edit.message_id)
     async with _lock:
@@ -82,7 +82,7 @@ async def status_message_f(
                 msg += f"\n<b>Status</b>: {file.progress_string()} <b>of</b> {file.total_length_string()}"
                 msg += f"\n<b>ETA:</b> {file.eta_string()}"
                 msg += f"\n{msgg}"
-                msg += f"\n<b>To Cancel:</b> <code>/cancel {file.gid}</code>"
+                msg += f"\n<b>To Cancel:</b> <code>/batal {file.gid}</code>"
                 msg += "\n"
 
         hr, mi, se = up_time(time.time() - BOT_START_TIME)
