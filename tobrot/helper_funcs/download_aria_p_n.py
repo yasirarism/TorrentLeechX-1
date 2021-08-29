@@ -126,7 +126,7 @@ def add_torrent(aria_instance, torrent_file_path):
         return False, "**FAILED** \nPlease try other sources to get workable link"
 
 
-def add_url(aria_instance, text_url, c_file_name, event):
+def add_url(aria_instance, text_url, c_file_name):
     options = None
     # if c_file_name is not None:
     #     options = {
