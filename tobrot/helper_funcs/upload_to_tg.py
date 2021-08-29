@@ -466,8 +466,8 @@ async def upload_single_file(
                     )
                 if thumb is not None:
                     os.remove(thumb)
-            elif local_file_name.upper().endswith(("HTML"):
-                await message.reply_text("Not supported link, jangan ngeyel")
+            elif local_file_name.upper().endswith("HTML") or local_file_name == "view":
+                await message.reply_text("Not supported link, jangan ngeyel !!!")
                 os.remove(local_file_name)
                 return
             elif local_file_name.upper().endswith(("MP3", "M4A", "M4B", "FLAC", "WAV")):
