@@ -2,7 +2,7 @@ aiohttp
 aria2p==0.9.1
 hachoir
 Pillow
-pyrogram
+https://github.com/pyrogram/pyrogram/archive/refs/heads/master.zip
 tgcrypto
 youtube_dl
 hurry.filesize
