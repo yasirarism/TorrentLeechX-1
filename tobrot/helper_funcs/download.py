@@ -20,12 +20,10 @@ from tobrot.helper_funcs.upload_to_tg import upload_to_gdrive
 
 
 async def down_load_media_f(client, message):  # to be removed
-    user_command = message.command[0]
-    user_id = message.from_user.id
-
     if message.reply_to_message is not None:
         the_real_download_location, mess_age = await download_tg(client, message)
         the_real_download_location_g = the_real_download_location
+        user_command = message.command[0]
         if user_command == TELEGRAM_LEECH_UNZIP_COMMAND.lower():
             try:
                 check_ifi_file = get_base_name(the_real_download_location)
@@ -37,6 +35,8 @@ async def down_load_media_f(client, message):  # to be removed
                 LOGGER.info(
                     f"Can't extract {os.path.basename(the_real_download_location)}, Uploading the same file"
                 )
+        user_id = message.from_user.id
+
         await upload_to_gdrive(the_real_download_location_g, mess_age, message, user_id)
     else:
         await mess_age.edit_text(

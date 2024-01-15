@@ -78,38 +78,39 @@ def fichier(link: str) -> str:
       raise DirectDownloadLinkException("💬 File tidak ditemukan / atau link nya salah!")
     soup = BeautifulSoup(req.content, 'lxml')
     if soup.find("a", {"class": "ok btn-general btn-orange"}) is not None:
-      dl_url = soup.find("a", {"class": "ok btn-general btn-orange"})["href"]
-      if dl_url is None:
-        raise DirectDownloadLinkException("💬 Gagal generate Direct Link 1fichier!")
-      else:
-        return dl_url
-    else:
-      if len(soup.find_all("div", {"class": "ct_warn"})) == 2:
+        dl_url = soup.find("a", {"class": "ok btn-general btn-orange"})["href"]
+        if dl_url is None:
+          raise DirectDownloadLinkException("💬 Gagal generate Direct Link 1fichier!")
+        else:
+          return dl_url
+    elif len(soup.find_all("div", {"class": "ct_warn"})) == 2:
         str_2 = soup.find_all("div", {"class": "ct_warn"})[-1]
         if "you must wait" in str(str_2).lower():
-          numbers = [int(word) for word in str(str_2).split() if word.isdigit()]
-          if len(numbers) == 0:
-            raise DirectDownloadLinkException("💬 1fichier sedang limit. Mohon tunggu beberapa menit/jam.")
-          else:
-            raise DirectDownloadLinkException(f"💬 1fichier sedang limit. Mohon tunggu {numbers[0]} menit.")
+            if numbers := [
+                int(word) for word in str(str_2).split() if word.isdigit()
+            ]:
+                raise DirectDownloadLinkException(f"💬 1fichier sedang limit. Mohon tunggu {numbers[0]} menit.")
+            else:
+                raise DirectDownloadLinkException("💬 1fichier sedang limit. Mohon tunggu beberapa menit/jam.")
         elif "protect access" in str(str_2).lower():
           raise DirectDownloadLinkException("💬 Link ini membutuhkan password!\n\n<b>This link requires a password!</b>\n- Insert sign <b>::</b> after the link and write the password after the sign.\n\n<b>Example:</b>\n<code>/mirror https://1fichier.com/?smmtd8twfpm66awbqz04::love you</code>\n\n* No spaces between the signs <b>::</b>\n* For the password, you can use a space!")
         else:
-          raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
-      elif len(soup.find_all("div", {"class": "ct_warn"})) == 3:
+            raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
+    elif len(soup.find_all("div", {"class": "ct_warn"})) == 3:
         str_1 = soup.find_all("div", {"class": "ct_warn"})[-2]
         str_3 = soup.find_all("div", {"class": "ct_warn"})[-1]
         if "you must wait" in str(str_1).lower():
-          numbers = [int(word) for word in str(str_1).split() if word.isdigit()]
-          if len(numbers) == 0:
-            raise DirectDownloadLinkException("💬 1fichier sedang limit. Mohon tunggu beberapa menit/jam.")
-          else:
-            raise DirectDownloadLinkException(f"💬 1fichier sedang limit. Mohon tunggu {numbers[0]} menit.")
+            if numbers := [
+                int(word) for word in str(str_1).split() if word.isdigit()
+            ]:
+                raise DirectDownloadLinkException(f"💬 1fichier sedang limit. Mohon tunggu {numbers[0]} menit.")
+            else:
+                raise DirectDownloadLinkException("💬 1fichier sedang limit. Mohon tunggu beberapa menit/jam.")
         elif "bad password" in str(str_3).lower():
           raise DirectDownloadLinkException("💬 Password yang kamu masukkan salah!")
         else:
-          raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
-      else:
+            raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
+    else:
         raise DirectDownloadLinkException("💬 Error saat mencoba generate Direct Link dari 1fichier!")
 
 
@@ -130,7 +131,7 @@ def zippy_share(url: str) -> str:
         except IndexError:
             js_script = pages.find("div", {"class": "right"}).find_all("script")[0]
         js_content = re.findall(r'\.href.=."/(.*?)";', str(js_script))
-        js_content = 'var x = "/' + js_content[0] + '"'
+        js_content = f'var x = "/{js_content[0]}"'
         evaljs = EvalJs()
         setattr(evaljs, "x", None)
         evaljs.execute(js_content)
@@ -146,12 +147,10 @@ def yandex_disk(url: str) -> str:
     try:
         text_url = re.findall(r'\bhttps?://.*yadi\.sk\S+', url)[0]
     except IndexError:
-        reply = "`No Yandex.Disk links found`\n"
-        return reply
+        return "`No Yandex.Disk links found`\n"
     api = 'https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key={}'
     try:
-        dl_url = requests.get(api.format(text_url)).json()['href']
-        return dl_url
+        return requests.get(api.format(text_url)).json()['href']
     except KeyError:
         raise DirectDownloadLinkException("`Error: File not found / Download limit reached`\n")
 
@@ -171,8 +170,7 @@ def cm_ru(url: str) -> str:
         data = json.loads(result)
     except json.decoder.JSONDecodeError:
         raise DirectDownloadLinkException("`Error: Can't extract the link`\n")
-    dl_url = data['download']
-    return dl_url
+    return data['download']
 
 
 def mediafire(url: str) -> str:
@@ -183,8 +181,7 @@ def mediafire(url: str) -> str:
         raise DirectDownloadLinkException("`No MediaFire links found`\n")
     page = BeautifulSoup(requests.get(text_url).content, 'lxml')
     info = page.find('a', {'aria-label': 'Download file'})
-    dl_url = info.get('href')
-    return dl_url
+    return info.get('href')
 
 
 def osdn(url: str) -> str:
@@ -214,8 +211,7 @@ def github(url: str) -> str:
         raise DirectDownloadLinkException("`No GitHub Releases links found`\n")
     download = requests.get(text_url, stream=True, allow_redirects=False)
     try:
-        dl_url = download.headers["location"]
-        return dl_url
+        return download.headers["location"]
     except KeyError:
         raise DirectDownloadLinkException("`Error: Can't extract the link`\n")
 
@@ -251,8 +247,7 @@ def fembed(link: str) -> str:
     lst_link = []
     try:
         count = len(dl_url)
-        for i in dl_url:
-            lst_link.append(dl_url[i])
+        lst_link.extend(dl_url[i] for i in dl_url)
         return lst_link[count-1]
     except:
         raise DirectDownloadLinkException("💬 File sudah dihapus..")
@@ -285,5 +280,4 @@ def racaty(url: str) -> str:
     ids = soup.find("input", {"name": "id"})["value"]
     rpost = scraper.post(url, data = {"op": op, "id": ids})
     rsoup = BeautifulSoup(rpost.text, "lxml")
-    dl_url = rsoup.find("a", {"id": "uniqueExpirylink"})["href"].replace(" ", "%20")
-    return dl_url
+    return rsoup.find("a", {"id": "uniqueExpirylink"})["href"].replace(" ", "%20")

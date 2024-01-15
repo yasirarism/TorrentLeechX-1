@@ -55,11 +55,10 @@ async def incoming_message_f(client, message):
     g_id = message.from_user.id
     # get link from the incoming message
     i_m_sefg = await message.reply_text("processing...", quote=True)
-    rep_mess = message.reply_to_message
     is_file = False
     dl_url = ''
     cf_name = ''
-    if rep_mess:
+    if rep_mess := message.reply_to_message:
         file_name = ''
         if rep_mess.media:
             file = [rep_mess.document, rep_mess.video, rep_mess.audio]
@@ -253,8 +252,8 @@ async def rename_tg_file(client, message):
         return
     if len(message.command) > 1:
         new_name = (
-            str(Path().resolve()) + "/" +
-            message.text.split(" ", maxsplit=1)[1].strip()
+            f"{str(Path().resolve())}/"
+            + message.text.split(" ", maxsplit=1)[1].strip()
         )
         file, mess_age = await download_tg(client, message)
         try:
